@@ -1,0 +1,13 @@
+搭建单片机安装环境
+
+编译器
+sudo apt-get install sdcc
+objcopy -I ihex -O binary hello51.ihx hello51.bin
+
+烧写
+依赖libvte-dev
+sudo apt-get install libvte-dev
+STC-ISP
+http://sourceforge.net/projects/gstcisp/
+编译时候会报头文件找不到，加上即可
+运行gSTCISP启动烧写程序
