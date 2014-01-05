@@ -1,3 +1,10 @@
+/*********************************************
+* 单机端口开放范围：
+*	look in /proc/sys/net/ip_local_port_range
+* 	change in /etc/sysctl.conf(sysctl -p)
+* 单进程最大文件限制
+	ulimit -n 10000
+*********************************************/
 #include <stdio.h>
 #include <string.h>
 #include <netinet/in.h>
@@ -177,12 +184,12 @@ int doconn()
 		//twrite((void*)sock);
 	}
 	printf("pid %d sleep\n",getpid());
-	sleep(600);	
+	sleep(60000);	
 }
 
 int main()
 {
-	int pcount=50;
+	int pcount=63;
 	int pid=-1;
 	for ( int j=0; j<pcount; j++ )
 	{
@@ -195,7 +202,7 @@ int main()
 	}
 
 	printf("main sleep\n");
-	sleep(600);
+	sleep(10000);
 
 	/*
 	pthread_t tid1;
