@@ -5,7 +5,6 @@
   基本功能:2.4GHZ无线双向通信功能测试
  ****************************RF:nrf24l01/NRF24L01+
 ****************************************/
-
 #include <8052.h>
 
 typedef unsigned char uchar;
@@ -301,10 +300,28 @@ void nRF24L01_TxPacket(unsigned char * tx_buf)
 	CE=1;		 														//置高CE，激发数据发送
 	inerDelay_us(10);
 }
+void send_buf()
+{
+	//回复状态
+	LED2 = 0;  
+	nRF24L01_TxPacket(TxBuf);						// 发送数据
+	sta=SPI_Read(STATUS);	
+	SPI_RW_Reg(WRITE_REG+STATUS,sta);
+
+	flag2=0;
+	inerDelay_us(1000);
+	LED2 = 1;  
+}
 //************************************主函数************************************************************
 void main(void)
 {
 	uchar i =0,tf=0;	
+	for (i = 0;i< 32;i++)
+	{ 
+		RxBuf[i]=0;	
+		TxBuf[i]=0;	
+	}
+
 	init_NRF24L01() ;				//初始化 NRF24L01/NRF24L01+		
 	Delay(600);						
 	UART_init();					//初始化 UART
@@ -315,16 +332,17 @@ void main(void)
 		{
 			if(RxBuf[0]==0x01) //设置管脚
 			{
-				if ( RxBuf[1] == 0x01 )
-				{
-					LED1=0;
+				if ( RxBuf[1] == 0 ){
+					LED1 = 1;
+					P2_0 = 0;
+				}else{
+					LED1 = 0;
 					P2_0 = 1;
 				}
-				else if ( RxBuf[1] == 0x02 )
-				{
-					LED1=1;	
-					P2_0 = 0;
-				}
+				//回复状态
+				TxBuf[0] = 0x02;
+				TxBuf[1] = RxBuf[1];
+				send_buf();
 			}
 			for (i = 0;i< 32;i++)
 			{ 
@@ -334,19 +352,13 @@ void main(void)
 			for (i = 0;i< 32;i++)
 			{ 
 				RxBuf[i]=0;	
+				TxBuf[i]=0;	
 			}
 		}
 		//发射数据
-		if(flag2==1)										//当收到串口数据后发送
+		if(flag2==1) //当收到串口数据后发送
 		{
-			LED2 = 0;  
-			nRF24L01_TxPacket(TxBuf);						// 发送数据
-			sta=SPI_Read(STATUS);	
-			SPI_RW_Reg(WRITE_REG+STATUS,sta);
-
-			flag2=0;	
-			inerDelay_us(1000);
-			LED2 = 1;  
+			send_buf();
 		}	
 	}
 }
